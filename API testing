@@ -1,0 +1,51 @@
+import org.junit.Test;
+import org.junit.Assert;
+
+public class CDRApiTests {
+
+    // Replace with the base URL of the CDR banking API
+    private static final String API_BASE_URL = "https://docs.api.tyro.com/cdr/";
+
+    // Replace with a valid user ID and authentication token
+    private static final String USER_ID = "abc123";
+    private static final String AUTH_TOKEN = "def456";
+
+    @Test
+    public void testGetAllProducts() {
+        // Use the API's /products endpoint to retrieve a list of all products
+        List<Product> products = get(API_BASE_URL + "products", USER_ID, AUTH_TOKEN);
+
+        // Extract the term deposit options from the list of products
+        List<Product> termDepositOptions = products.stream()
+            .filter(product -> product.getType() == ProductType.TERM_DEPOSIT)
+            .collect(Collectors.toList());
+
+        // Assert that the list of term deposit options is not empty
+        Assert.assertFalse(termDepositOptions.isEmpty());
+    }
+
+    @Test
+    public void testGetBusinessLoanDetails() {
+        // Use the API's /products/{id} endpoint to retrieve the details of the "Tyro Business Loan" product
+        Product businessLoan = get(API_BASE_URL + "products/tyro-business-loan", USER_ID, AUTH_TOKEN);
+
+        // Extract the eligibility criteria for the business loan from the product details
+        List<String> eligibilityCriteria = businessLoan.getEligibilityCriteria();
+
+        // Assert that the eligibility criteria is not empty
+        Assert.assertFalse(eligibilityCriteria.isEmpty());
+    }
+
+    @Test
+    public void testGetAllProductsError() {
+        // Use the API's /products endpoint without providing authentication credentials
+        List<Product> products = get(API_BASE_URL + "products", null, null);
+
+        // Assert that the API returns a 401 Unauthorized error
+        Assert.assertEquals(401, products.getStatusCode());
+    }
+
+    @Test
+    public void testGetBusinessLoanDetailsError() {
+        // Use the API's /products/{id} endpoint with an invalid product ID
+        Product businessLoan = get(API_BASE_URL + "products/invalid-product-id", US
